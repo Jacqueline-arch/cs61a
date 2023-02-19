@@ -139,10 +139,11 @@ def funception(func1, start):
         if start >= x:
             return func1(start)
         accumulation = 1
-        while start < x:
-            accumulation *= func1(start)
-            start += 1
-            return accumulation
+        i = start
+        while i < x:
+            accumulation *= func1(i)
+            i = i + 1
+        return accumulation
     return func2
 
 

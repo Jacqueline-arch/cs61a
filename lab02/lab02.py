@@ -1,6 +1,6 @@
-
 def composer(f, g):
-    """Return the composition function which given x, computes f(g(x)).
+    """
+    Return the composition function which given x, computes f(g(x)).
 
     >>> add_one = lambda x: x + 1        # adds one to x
     >>> square = lambda x: x**2
@@ -129,11 +129,11 @@ def cycle(f1, f2, f3):
             if n == 0:
                 return x     
             if n % 3 == 1:
-                return f1(final(n-1))
+                return f1(my_cycle(n-1)(x))
             if n % 3 == 2:
-                return f2(final(n-1))
+                return f2(my_cycle(n-1)(x))
             if n % 3 == 0:
-                return f3(final(n-1))
+                return f3(my_cycle(n-1)(x))
         return final
     return my_cycle
 

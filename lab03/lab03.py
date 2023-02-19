@@ -131,7 +131,7 @@ def div_by_primes_under(n):
             checker = (lambda f, i: lambda x: x % i == 0 or f(x))(checker, i)
         i = i + 1
     return checker
-#lambda x: x % i == 0
+#div_by_primes_under(4)(12)
 def div_by_primes_under_no_lambda(n):
     """
     >>> div_by_primes_under_no_lambda(10)(11)
