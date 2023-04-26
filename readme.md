@@ -1,7 +1,7 @@
 # What the project does?
 homework for [CS61a](https://cs61a.org)
 # Why the project is useful?
-usefel for newbie
+useful for newbie
 # How users can get started with this project?
 starting from Lecture 1
 # Where users can get help with your project?
