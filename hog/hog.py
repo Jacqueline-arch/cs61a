@@ -256,7 +256,7 @@ def max_scoring_num_rolls(dice=six_sided, total_samples=1000):
     while i <= 10:
         result = average(i, dice)
         if result > max_average:
-            max_average = resule
+            max_average = result
             num = i
         i += 1
     return num
