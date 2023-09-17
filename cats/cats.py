@@ -30,11 +30,15 @@ def pick(paragraphs, select, k):
     ''
     """
     # BEGIN PROBLEM 1
-    new_paragraph = [ p for p in paragraphs if select(p)]
-    if k < len(new_paragraph):
-        return new_paragraph[k]
-    else:
-        return ''
+    i = 0
+    for i in paragraphs:
+        if select(i):
+            if i == k:
+                return i
+            i += 1
+    return ""
+
+
 
         
     # END PROBLEM 1
@@ -55,14 +59,15 @@ def about(subject):
     """
     assert all([lower(x) == x for x in subject]), 'subjects should be lowercase.'
     # BEGIN PROBLEM 2
-    lower_subject = [lower(x) for x in subject]
-    def select(paragraph):
-        paragraph = split(remove_punctuation(lower(paragraph)))
-        for i in lower_subject:
-            if i in paragraph:
-                return True
-        return False
-    return select
+    # def select(paragraph):
+    #     paragraph = split(remove_punctuation(lower(paragraph)))
+    #     for i in paragraph:
+    #        if i in subject:
+    #            return True
+    #     return False 
+    # return select
+    return lambda para: bool(set(remove_punctuation(para.lower()).split()) & set(subject))
+
     # END PROBLEM 2
 
 
@@ -92,26 +97,22 @@ def accuracy(typed, source):
     type_words = split(typed)
     source_words = split(source)
     # BEGIN PROBLEM 3
-    total = 0
-    if type_words == [] and source_words == []:
+    if not type_words and not source_words:
         return 100.0
-    if type_words == [] and len(source_words) > 0:
+    len1 = len(type_words)
+    len2 = len(source_words)
+    i = sum(1 for i in range(len2) if (i < len1) and (source_words[i] == type_words[i]))
+    if i == 0:
         return 0.0
-    if len(type_words) > 0 and source_words == []:
-        return 0.0
-    else:
-        for i in range(0, len(type_words)):
-            if i >= len(source_words):
-                total += 0
-            else:
-                if type_words[i] == source_words[i]:
-                    total += 1
-        return total/len(type_words)*100
+    return i / len1 * 100.0
+
+
     # END PROBLEM 3
 
 
 def wpm(typed, elapsed):
-    """Return the words-per-minute (WPM) of the TYPED string.
+    """Return the words-per-minute (WPM) of the TYPED string.Despite its name, words per minute 
+    is not based on the number of words typed, but instead the number of groups of 5 characters, 
 
     Arguments:
         typed: an entered string
@@ -124,8 +125,8 @@ def wpm(typed, elapsed):
     """
     assert elapsed > 0, 'Elapsed time must be positive'
     # BEGIN PROBLEM 4
-    number_words = len(typed)/5
-    return (number_words * 60) / elapsed
+    return (len(typed)/5)/(elapsed/60)
+
     # END PROBLEM 4
 
 
@@ -143,6 +144,9 @@ def autocorrect(typed_word, word_list, diff_function, limit):
         word_list: a list of strings representing source words
         diff_function: a function quantifying the difference between two words
         limit: a number
+        
+    Hint: Try using max or min with the optional key argument (which takes in a one-argument function). 
+    For example, max([-7, 2, -1], key = abs) would return -7 since abs(-7) is greater than abs(2) and abs(-1).
 
     >>> ten_diff = lambda w1, w2, limit: 10 # Always returns 10
     >>> autocorrect("hwllo", ["butter", "hello", "potato"], ten_diff, 20)
@@ -154,14 +158,11 @@ def autocorrect(typed_word, word_list, diff_function, limit):
     # BEGIN PROBLEM 5
     if typed_word in word_list:
         return typed_word
-    else:
-        def helper(x):
-            return diff_function(typed_word, x, limit)
-        word = min(word_list, key = helper)
-        if diff_function(typed_word, word, limit) <= limit:
-            return word
-        else:
-            return typed_word
+    ans = min(word_list, key = lambda x : diff_function(typed_word, x, limit))
+    if diff_function(typed_word, ans, limit) > limit:
+        return typed_word
+    return ans
+
     # END PROBLEM 5
 
 
@@ -183,27 +184,14 @@ def feline_fixes(typed, source, limit):
     >>> feline_fixes("rose", "hello", big_limit)   # Substitute: r->h, o->e, s->l, e->l, length difference of 1.
     5
     """
-    # BEGIN PROBLEM 6
-    def helper(a, b, c):
-        if c > limit:
-            return c
-        if a == b:
-                return c
-        else:
-            if a == '' and b =="":
-                return 0
-            if a[0] == b[0]:
-                return helper(a[1:], b[1:], c) 
-            else:
-                return helper(a[1:], b[1:], c + 1)
-            
-    if len(typed) == len(source):
-        total = helper(typed, source, 0)
-    else: 
-        extra = abs(len(typed) - len(source))
-        i = min(len(typed), len(source))
-        total = helper(typed[:i], source[:i], extra)
-    return total
+    if limit < 0:
+        return 0
+    if not typed or not source:
+        return len(typed) + len(source)
+    if typed[0] == source[0]:
+        return feline_fixes(typed[1:], source[1:], limit)
+    else:
+        return 1 + feline_fixes(typed[1:], source[1:], limit - 1)
     # END PROBLEM 6
 
 
@@ -222,32 +210,38 @@ def minimum_mewtations(typed, source, limit):
     >>> minimum_mewtations("ckiteus", "kittens", big_limit) # ckiteus -> kiteus -> kitteus -> kittens
     3
     """
-    if typed != source and limit == 0:
-        return limit + 1
-    if len(typed) == 0: 
-        return len(source)
-    if len(source) == 0:
-        return len(typed) 
-    if typed[0] == source[0]:  
+    # BEGIN PROBLEM 7
+
+ 
+    if limit < 0:  # Base cases should go here, you may add more base cases as needed.
+        # BEGIN
+        return 0
+        # END
+    if typed == source:
+        return 0
+    if not typed or not source:
+        return len(typed) + len(source)
+    # Recursive cases should go below here
+    if typed[0] == source[0]:  # Feel free to remove or add additional cases
+        # BEGIN
         return minimum_mewtations(typed[1:], source[1:], limit)
+        # END
     else:
-        add =  minimum_mewtations(typed, source[1:], limit - 1 )
-        remove = minimum_mewtations(typed[1:], source, limit - 1)
-        substitute = minimum_mewtations( typed[1:], source[1:],limit -1)
-        return 1 + min(add, remove, substitute, limit)
-      
+        add = minimum_mewtations(typed, source[1:], limit-1) # Fill in these lines
+        remove = minimum_mewtations(typed[1:], source, limit-1)
+        substitute = minimum_mewtations(typed[1:], source[1:], limit-1)
+        # BEGIN
+        return 1+min(add, remove, substitute)
+        # END 
         
 
-# def minimum_mewtations(a, b, limit):
-#     # Levenshtein distance
-#     if not len(a): return len(b)
-#     if not len(b): return len(a)
-#     if(a[0] == b[0]): return minimum_mewtations(a[1:], b[1:], limit-1)
-#     if limit == 0:
-#         return 0
-#     return 1 + min(minimum_mewtations(a[1:], b[1:], limit-1), minimum_mewtations(a[1:],b, limit-1), minimum_mewtations(a, b[1:], limit-1), limit)
-#         # END
 
+
+
+
+
+
+    # # END PROBLEM 7
 
 def final_diff(typed, source, limit):
     """A diff function that takes in a string TYPED, a string SOURCE, and a number LIMIT.
@@ -262,10 +256,16 @@ FINAL_DIFF_LIMIT = 6  # REPLACE THIS WITH YOUR LIMIT
 # Phase 3 #
 ###########
 
+    
 
 def report_progress(typed, prompt, user_id, upload):
     """Upload a report of your id and progress so far to the multiplayer server.
-    Returns the progress so far.
+    Returns the progress so far. Your progress is a ratio of the words in the prompt that you have typed correctly,
+    up to the first incorrect word, divided by the number of prompt words.
+
+    Hint: See the dictionary below for an example of a potential input into the upload function. 
+    This dictionary represents a player with user_id 1 and progress 0.6.
+    {'id': 1, 'progress': 0.6}
 
     Arguments:
         typed: a list of the words typed so far
@@ -287,16 +287,14 @@ def report_progress(typed, prompt, user_id, upload):
     0.2
     """
     # BEGIN PROBLEM 8
-    correct = 0
-    for i in range(0, len(typed)):
-        if typed[i] != prompt[i]:
-            break
-        correct += 1
-        
-    ratio = correct / len(prompt)
-    identity =  {"id": user_id, "progress": ratio}
-    upload(identity)
-    return ratio  
+    i = 0
+    while i < len(typed) and typed[i] == prompt[i]:
+        i += 1
+    ratio = i / len(prompt)
+    report = {"id": user_id, "progress": ratio}
+    upload(report)
+    return ratio
+
     # END PROBLEM 8
 
 
@@ -318,15 +316,25 @@ def time_per_word(words, times_per_player):
     [[6, 3, 6, 2], [10, 6, 1, 2]]
     """
     # BEGIN PROBLEM 9
-    total_time = []
-    for i in range(0, len(times_per_player)):
+    time_list = []
+    n = len(words)
+    for player in times_per_player:
         time = []
-        for k in range(0, (len(times_per_player[i])-1)):
-            time.append(times_per_player[i][k + 1] - times_per_player[i][k])
-        total_time += [time]
-    return match(words, total_time)
+        for j in range(n):
+            time.append(player[j+1]-player[j])
+        time_list.append(time)
+    return match(words, time_list)
 
-    # END PROBLEM 9``
+
+
+
+
+
+
+
+  
+
+    # END PROBLEM 9
 
 
 
@@ -348,14 +356,13 @@ def fastest_words(match):
     player_indices = range(len(get_all_times(match)))  # contains an *index* for each player
     word_indices = range(len(get_all_words(match)))    # contains an *index* for each word
     # BEGIN PROBLEM 10
-    word = [[] for _ in range(len(get_all_times(match)))]
+    ans = [[] for j in player_indices]
     for i in word_indices:
-        times = []
-        for k in player_indices:
-            times.append(time(match, k, i))
-            index = times.index(min(times))
-        word[index].append(get_word(match, i))
-    return word
+        idx = min(player_indices, key = lambda x: time(match, x, i))
+        ans[idx].append(get_word(match,i))
+    return ans
+
+
 
     # END PROBLEM 10
 

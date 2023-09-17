@@ -3,7 +3,7 @@
 from dice import six_sided, make_test_dice
 from ucb import main, trace, interact
 from math import log2
-import math
+from math import sqrt
 
 GOAL = 100  # The goal of Hog is to score 100 points.
 
@@ -23,19 +23,18 @@ def roll_dice(num_rolls, dice=six_sided):
     assert type(num_rolls) == int, 'num_rolls must be an integer.'
     assert num_rolls > 0, 'Must roll at least once.'
     # BEGIN PROBLEM 1
-    total_score = 0
-    number_one = False
-    i = 1
-    while i <= num_rolls:
-        current_score = dice()
-        if current_score != 1:
-            total_score += current_score
-        else:
-            number_one = True
-        i += 1
-    if number_one:
-        total_score = 1 
-    return total_score
+    sow_sad = False
+    score = 0
+    while num_rolls:
+        number = dice()
+        if number == 1:
+            sow_sad = True
+        score += number
+        num_rolls -= 1
+    if sow_sad:
+        return 1
+    return score
+    
     # END PROBLEM 1
 
 
@@ -45,10 +44,10 @@ def tail_points(opponent_score):
     opponent_score:   The total score of the other player.
 
     """
+    # 2 * abs(tens - ones) + 1 
     # BEGIN PROBLEM 2
-    ones = opponent_score % 10
-    tens = opponent_score // 10 % 10
-    return 2*abs(tens - ones) + 1
+    return 2 * abs(opponent_score%10 - opponent_score//10%10) + 1
+    
 
     # END PROBLEM 2
 
@@ -66,10 +65,7 @@ def take_turn(num_rolls, opponent_score, dice=six_sided):
     assert num_rolls >= 0, 'Cannot roll a negative number of dice in take_turn.'
     assert num_rolls <= 10, 'Cannot roll more than 10 dice.'
     # BEGIN PROBLEM 3
-    if num_rolls == 0:
-        return tail_points(opponent_score)
-    else:
-        return roll_dice(num_rolls, dice)
+    return tail_points(opponent_score) if num_rolls == 0 else roll_dice(num_rolls, dice)
     # END PROBLEM 3
 
 
@@ -93,15 +89,10 @@ def square_update(num_rolls, player_score, opponent_score, dice=six_sided):
 
 # BEGIN PROBLEM 4
 def perfect_square(score):
-    i = 1
-    while i <= score:
-        if score / i == i:
-            return True
-        i += 1
-    return False
-
+    return sqrt(score) % 1 == 0
+#   return (int(n**0.5))**2 == n 
 def next_perfect_square(score):
-    return int((math.sqrt(score)+1)**2)
+    return int((sqrt(score) + 1)**2)
 
 # END PROBLEM 4
 
@@ -143,15 +134,10 @@ def play(strategy0, strategy1, update,
     # BEGIN PROBLEM 5
     while score0 < goal and score1 < goal:
         if who == 0:
-            num_rolls = strategy0(score0, score1)
-            score0 = update(num_rolls, score0, score1, dice)
-        if score0 < goal:
-            who = 1
+            score0 = update(strategy0(score0, score1),score0,score1,dice)
         if who == 1:
-            num_rolls = strategy1(score1, score0)
-            score1 = update(num_rolls, score1, score0, dice)
-        if score1 < goal:
-            who = 0
+            score1 = update(strategy1(score1, score0),score1,score0,dice)
+        who = 1 - who
     # END PROBLEM 5
     return score0, score1
 
@@ -174,11 +160,11 @@ def always_roll(n):
     >>> strategy(99, 99)
     3
     """
-    assert n >= 0 and n <= 10
     # BEGIN PROBLEM 6
-    def func(x, y):
+    def g(player_score, opponent_score):
         return n
-    return func
+    return g
+  # return lambda x, y: n
         
     # END PROBLEM 6
 
@@ -199,7 +185,7 @@ def catch_up(score, opponent_score):
 
 
 def is_always_roll(strategy, goal=GOAL):
-    """Return whether strategy always chooses the same number of dice to roll.
+    """Return whether strategy always chooses the same number of dice to roll for every possible argument combination
 
     >>> is_always_roll(always_roll_5)
     True
@@ -209,20 +195,23 @@ def is_always_roll(strategy, goal=GOAL):
     False
     """
     # BEGIN PROBLEM 7
-    base = strategy(0, 0)
-    for x in range (0, 100):
-        for y in range(0, 100):
-            if strategy(x, y) != base:
+    rolls = strategy(0,0)
+    for i in range(goal):
+        for j in range(goal):
+            if strategy(i, j) != rolls:
                 return False
-    return True
+    return True                
     # END PROBLEM 7
 
 
 def make_averaged(original_function, total_samples=1000):
     """Return a function that returns the average value of ORIGINAL_FUNCTION
-    called TOTAL_SAMPLES times.
+    called TOTAL_SAMPLES times.The returned function 
+    that takes in the same number of arguments as original_function. 
 
     To implement this function, you will have to use *args syntax.
+    Instead of listing formal parameters for a function, you can write *args, 
+    which represents all of the arguments that get passed into the function.
 
     >>> dice = make_test_dice(4, 2, 5, 1)
     >>> averaged_dice = make_averaged(roll_dice, 40)
@@ -230,12 +219,16 @@ def make_averaged(original_function, total_samples=1000):
     3.0
     """
     # BEGIN PROBLEM 8
-    def func(*args):
+    def g(*args):
         total = 0
-        for i in range (0, total_samples):
+        for i in range(total_samples):
             total += original_function(*args)
         return total / total_samples
-    return func
+    return g
+
+    # def g(*args):
+    #     return sum(original_function(*args) for i in range(total_samples)) / total_samples
+    # return g
     # END PROBLEM 8
 
 
@@ -244,22 +237,23 @@ def max_scoring_num_rolls(dice=six_sided, total_samples=1000):
     by calling roll_dice with the provided DICE a total of TOTAL_SAMPLES times.
     Assume that the dice always return positive outcomes.
 
+    If two numbers of rolls are tied for the maximum average score, return the lower number. 
+    For example, if both 3 and 6 achieve a maximum average score, return 3.
+
     >>> dice = make_test_dice(1, 6)
-    >>> max_scoring_num_rolls(dice)
+    >>> max_scoring_num_rolls(dice)s
     1
     """
     # BEGIN PROBLEM 9
-    average = make_averaged(roll_dice, total_samples)
-    max_average = average(1, dice)
-    num = 1
-    i = 2
-    while i <= 10:
-        result = average(i, dice)
-        if result > max_average:
-            max_average = result
-            num = i
-        i += 1
-    return num
+    averaged_dice = make_averaged(roll_dice, total_samples)
+    max_average = 0
+    number_of_rolls = 0
+    for i in range(1, 11):
+        cur_average = averaged_dice(i, dice)
+        if  cur_average > max_average:
+            max_average = cur_average
+            number_of_rolls = i
+    return number_of_rolls
     # END PROBLEM 9
 
 
@@ -303,18 +297,15 @@ def tail_strategy(score, opponent_score, threshold=12, num_rolls=6):
     points, and returns NUM_ROLLS otherwise. Ignore score and Square Swine.
     """
     # BEGIN PROBLEM 10
-    if tail_points(opponent_score) >= threshold:
-        num_rolls = 0
-    return num_rolls  
+    return 0 if tail_points(opponent_score) >= threshold else num_rolls
+    
     # END PROBLEM 10
 
 
 def square_strategy(score, opponent_score, threshold=12, num_rolls=6):
     """This strategy returns 0 dice when your score would increase by at least threshold."""
     # BEGIN PROBLEM 11
-    if square_update(0, score, opponent_score) - score >= threshold:
-        num_rolls = 0
-    return num_rolls  
+    return 0 if (square_update(0, score, opponent_score) - score) >= threshold else num_rolls
     # END PROBLEM 11
 
 
