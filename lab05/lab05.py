@@ -79,10 +79,14 @@ def my_reduce(combiner, seq):
     >>> my_reduce(lambda x, y: x + 2 * y, [1, 2, 3]) # (1 + 2 * 2) + 2 * 3
     11
     """
-    if len(seq) == 1:
-        return seq[0]
-    else:
-        return combiner(my_reduce(combiner, seq[:len(seq)-1]), seq[-1])
+    # if len(seq) == 1:
+    #     return seq[0]
+    # else:
+    #     return combiner(my_reduce(combiner, seq[:len(seq)-1]), seq[-1])
+    ans = seq[0]
+    for i in range(1, len(seq)):
+        ans = combiner(ans, seq[i])
+    return ans
     
 
 def my_map_syntax_check():
@@ -138,13 +142,14 @@ def closer_city(lat, lon, city_a, city_b):
     >>> closer_city(41.29, 174.78, bucharest, vienna)
     'Bucharest'
     """
-    target_city = make_city("city_c", lat, lon)
-    dis_a = distance(target_city, city_a)
-    dis_b = distance(target_city, city_b)
-    if dis_b <= dis_a:
-        return get_name(city_b)
-    else:
-        return get_name(city_a)
+    # target_city = make_city("city_c", lat, lon)
+    # dis_a = distance(target_city, city_a)
+    # dis_b = distance(target_city, city_b)
+    # if dis_b <= dis_a:
+    #     return get_name(city_b)
+    # else:
+    #     return get_name(city_a)
+    return get_name(min(city_a, city_b, key= lambda x: distance(make_city("city_c", lat, lon), x)))
 
 def check_city_abstraction():
     """
@@ -234,8 +239,7 @@ def count_palindromes(L):
     >>> count_palindromes(("Acme", "Madam", "Pivot", "Pip"))
     2
     """
-    return len([ i for i in L if i.lower()[::-1] == i.lower()])
-
+    return len(my_filter(lambda x: x.lower()[::-1] == x.lower(), L))
 
 def coords(fn, seq, lower, upper):
     """
@@ -246,7 +250,7 @@ def coords(fn, seq, lower, upper):
     """
     "*** YOUR CODE HERE ***"
     return [[i, fn(i)]for i in seq if lower <= fn(i) <= upper]
-
+    
 
 def change_abstraction(change):
     """
