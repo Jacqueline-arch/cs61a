@@ -104,8 +104,7 @@ def total_weight(m):
     else:
         assert is_mobile(m), "must get total weight of a mobile or a planet"
         return total_weight(end(left(m))) + total_weight(end(right(m)))
-total_weight(mobile(arm(1, planet(2)),
-               arm(2, planet(1))))
+
 
 def balanced(m):
     """Return whether m is balanced.
@@ -127,13 +126,8 @@ def balanced(m):
     >>> check(HW_SOURCE_FILE, 'balanced', ['Index'])
     True
     """
-    if is_planet(m):
-        return True
-    else:
-        if total_weight(end(left(m))) * length(left(m)) == total_weight(end(right(m))) * length(right(m)):
-            if balanced((end(left(m)))) and balanced((end(right(m)))):
-                return True
-    return False
+    return is_planet(m) or (is_mobile(m) and balanced(end(left(m))) and balanced(end(right(m))) and total_weight(end(left(m)))*length(left(m)) == total_weight(end(right(m)))*length(right(m)))
+
 
 
 def totals_tree(m):
@@ -168,7 +162,7 @@ def totals_tree(m):
     if is_planet(m):
         return tree(mass(m))
     else:
-        return tree(total_weight(end(left(m))) + total_weight(end(right(m))), [totals_tree(end(left(m)))] + [totals_tree(end(right(m)))])
+        return tree((total_weight(m)), [totals_tree(end(left(m))),totals_tree(end(right(m)))])
 
 
 def replace_loki_at_leaf(t, lokis_replacement):
@@ -203,8 +197,7 @@ def replace_loki_at_leaf(t, lokis_replacement):
     if is_leaf(t):
         if label(t) == "loki":
             return tree(lokis_replacement)
-        else:
-            return tree(label(t))
+        return tree(label(t))
     else:
         return tree(label(t), [replace_loki_at_leaf(b, lokis_replacement)for b in branches(t)])
     
@@ -241,13 +234,11 @@ def has_path(t, word):
     False
     """
     assert len(word) > 0, 'no path for empty word.'
-    if label(t) == word:
+    # Your code starts below:
+    if word == label(t):
         return True
-    else:
-        if word[0] == label(t):
-            for i in [has_path(b, word[1:]) for b in branches(t)]:
-                if i:
-                    return True
+    if word[0] == label(t):
+            return any([has_path(b, word[1:]) for b in branches(t)])
     return False
 
 
@@ -314,8 +305,6 @@ def div_interval(x, y):
     reciprocal_y = interval(1 / upper_bound(y), 1 / lower_bound(y))
     return mul_interval(x, reciprocal_y)
 
-r1 = interval(1, 2)  # Replace this line!
-r2 = interval(1, 2)
 def par1(r1, r2):
     return div_interval(mul_interval(r1, r2), add_interval(r1, r2))
 
