@@ -32,15 +32,12 @@ def insert_items(lst, entry, elem):
     i = 0
     while i < len(lst):
         if lst[i] == entry:
-            lst.insert(i + 1, elem)
-            if entry == elem:
-                i += 2 
-            else: 
-                i += 1
+            lst.insert(i+1, elem)
+            i += 2
         else:
             i += 1
+        
     return lst
-
     
 
 def count_occurrences(t, n, x):
@@ -63,11 +60,11 @@ def count_occurrences(t, n, x):
     >>> count_occurrences(s2, 6, 6)
     2
     """
-    ct = 0
-    for _ in range(0, n):
-        if next(t) == x:
-            ct += 1
-    return ct
+    count = 0
+    for _ in range(n):
+        if x == next(t):
+            count += 1
+    return count
 
 
 def repeated(t, k):
@@ -92,18 +89,18 @@ def repeated(t, k):
     2
     """
     assert k > 1
-    
-    value1 = next(t)
+    "*** YOUR CODE HERE ***"
     ct = 1
-    while ct < k :
-        value2 = next(t)
-        if value2 == value1:
+    cur = next(t)
+    while ct < k:
+        prev = cur
+        cur = next(t)
+        if cur == prev:
             ct += 1
         else:
             ct = 1
-        value1 = value2
-    return value1
-            
+    return cur
+   
 
 
 def partial_reverse(lst, start):
@@ -118,13 +115,13 @@ def partial_reverse(lst, start):
     >>> a
     [1, 2, 7, 6, 5, 3, 4]
     """
-    
-    # sublist = lst[start:]
-    # for i in range(start, len(lst)):
-    #     lst.pop()
-    # t = reversed(sublist)
-    # lst.extend(list(t))
+    # n = len(lst)
+    # new = reversed(lst[start:n])
+    # for i in range(start, n):
+    #     lst[i] = next(new)
+    # return
     lst[start:] = lst[start:][::-1]
+
 
 def index_largest(seq):
     """Return the index of the largest element in the sequence.
@@ -137,10 +134,11 @@ def index_largest(seq):
     assert len(seq) > 0
     max = seq[0]
     idx = 0
-    for i in range(len(seq)):
-        if seq[i] > max:
+    for i in range(1,len(seq)):
+        cur = seq[i]
+        if cur > max:
             idx = i 
-            max = seq[i]
+            max = cur
     return idx
 
 def pizza_sort(lst):
@@ -154,14 +152,13 @@ def pizza_sort(lst):
     """
     pizza_sort_helper(lst, 0)
 
-
 def pizza_sort_helper(lst, start):
-    if start < len(lst):
+    if start<len(lst):
         partial_reverse(lst, index_largest(lst[start:])+start)
-        partial_reverse(lst, start)
-        pizza_sort_helper(lst, start + 1)
+        partial_reverse(lst,start)
+        pizza_sort_helper(lst, start+1)
 
-    
+
     
     
 
