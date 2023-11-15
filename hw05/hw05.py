@@ -11,11 +11,10 @@ def hailstone(n):
     yield n
     if n == 1:
         yield from hailstone(1)
-    if n % 2 == 0: 
-        yield from hailstone(n // 2)
-    else: 
-        yield from hailstone(n * 3 + 1)
-    
+    elif n%2==0:
+        yield from hailstone(n//2)
+    else:
+        yield from hailstone(n*3+1)
 
 
 def merge(a, b):
@@ -32,7 +31,7 @@ def merge(a, b):
     """
     x = next(a)
     y = next(b)
-    while 1:
+    while 1:     
         if x < y:
             yield x
             x = next(a)
@@ -43,6 +42,7 @@ def merge(a, b):
             yield x
             x = next(a)
             y = next(b)
+   
        
 
 
@@ -68,15 +68,17 @@ def perms(seq):
     >>> sorted(perms("ab"))
     [['a', 'b'], ['b', 'a']]
     """
-    seq = list(seq)
-    if len(seq) == 0:
-        yield []
+    n = len(seq)
+    if n == 1:
+        yield list(seq)
     else:
-        for i in perms(seq[0:len(seq) - 1]):
-            for x in range(len(i) + 1):
-                lst = i.copy()
-                lst.insert(x, seq[-1])
-                yield lst 
+        a = seq[0]
+        for i in perms(seq[1:]):      
+            for j in range(n):
+                yield i[:j] + [a] + i[j:]
+
+
+
 
 
 def yield_paths(t, value):
@@ -113,14 +115,17 @@ def yield_paths(t, value):
     >>> sorted(list(path_to_2))
     [[0, 2], [0, 2, 1, 2]]
     """
-   
+    "*** YOUR CODE HERE ***"
+    # for _______________ in _________________:
+    #     for _______________ in _________________:
+    #       "*** YOUR CODE HERE ***"
+    
+    a = label(t)
     if label(t) == value:
-        yield [value]
-    for b in branches(t):
-        for i in yield_paths(b, value):
-            lst = [label(t)] + i
-            yield lst 
-
+        yield [a]
+    for i in branches(t):
+        for j in yield_paths(i,value):
+            yield [a]+j
 
 
 def remainders_generator(m):
@@ -154,15 +159,15 @@ def remainders_generator(m):
     7
     11
     """
-   
-    def inner_generator(g, x):
-        y = next(g)
-        while 1:
-            if y % m == x:
-                yield y
-            y = next(g)
+    def helper(x):
+        for n in naturals(): 
+            if n % m == x:
+                 yield n 
     for i in range(m):
-        yield inner_generator(naturals() , i)
+        yield helper(i)
+
+
+
 
 
 
